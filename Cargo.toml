@@ -9,7 +9,7 @@ edition = "2018"
 clap = "2.33.0"
 warp = { git="https://github.com/seanmonstar/warp.git" }
 comrak = "0.6.2"
-tokio = { version = "0.2", features = ["blocking", "fs", "macros", "rt-threaded", "stream", "sync", "time"] }
+tokio = { version = "0.2", features = ["blocking", "io-util", "fs", "macros", "rt-threaded", "stream", "sync", "time"] }
 futures = "0.3"
 http = "0.2"
 ammonia = "3.0.0"
