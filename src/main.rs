@@ -149,7 +149,7 @@ async fn convert(
             if full_path_ext.exists() {
                 process_file(&full_path_ext, context.cache).await
             } else {
-                Err(warp::reject())
+                Err(warp::reject::not_found())
             }
         }
     }
@@ -157,6 +157,21 @@ async fn convert(
 
 fn inject_context(ctx: Context) -> warp::filters::BoxedFilter<(Context,)> {
     warp::any().map(move || ctx.clone()).boxed()
+}
+
+fn print_log(info: warp::filters::log::Info) {
+    use chrono::Utc;
+    eprintln!(
+        "{} {} {} {} {} {}",
+        Utc::now().to_rfc3339(),
+        info.remote_addr()
+            .map(|a| format!("{}", a.ip()))
+            .unwrap_or("-".into()),
+        info.method(),
+        info.path(),
+        info.status(),
+        info.elapsed().as_millis(),
+    );
 }
 
 // #[tokio::main]
@@ -172,7 +187,10 @@ async fn serve(argv0: String, argv1: String) {
         .and(warp::path::full())
         .and(inject_context(ctx.clone()))
         .and_then(convert)
-        .or(dir);
+        .or(dir)
+        .with(warp::log::custom(|info: warp::filters::log::Info| {
+            print_log(info)
+        }));
     let service = warp::serve(get);
     let addr: std::net::SocketAddr = argv1.parse().expect("not a valid address");
     println!("running on http://{}", addr);
