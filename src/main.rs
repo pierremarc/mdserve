@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate lazy_static;
+use ammonia;
 use clap::{App, Arg};
 use comrak::{markdown_to_html, ComrakOptions};
 use std::path::PathBuf;
@@ -35,20 +38,39 @@ impl warp::Reply for Rendered {
     }
 }
 
-fn options() -> ComrakOptions {
-    ComrakOptions {
+// fn options() -> ComrakOptions {
+//     ComrakOptions {
+//         smart: true,
+//         unsafe_: true,
+//         ext_superscript: true,
+//         ext_autolink: true,
+//         ext_table: true,
+//         ext_header_ids: Some(String::new()),
+//         ..ComrakOptions::default()
+//     }
+// }
+
+lazy_static! {
+    static ref CLEANER: ammonia::Builder<'static> = {
+        let mut d = ammonia::Builder::default();
+        d.add_generic_attributes(&["id", "class"]);
+        d
+    };
+    static ref CM_OPTIONS: ComrakOptions = ComrakOptions {
         smart: true,
+        unsafe_: true,
         ext_superscript: true,
         ext_autolink: true,
         ext_table: true,
         ext_header_ids: Some(String::new()),
         ..ComrakOptions::default()
-    }
+    };
 }
 
 fn process(input: &str) -> String {
-    let options = options();
-    markdown_to_html(input, &options)
+    CLEANER
+        .clean(&markdown_to_html(input, &CM_OPTIONS))
+        .to_string()
 }
 
 async fn process_file(path: &PathBuf) -> Result<Rendered, Rejection> {

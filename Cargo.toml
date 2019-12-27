@@ -12,3 +12,5 @@ comrak = "0.6.2"
 tokio = { version = "0.2", features = ["blocking", "fs", "macros", "rt-threaded", "stream", "sync", "time"] }
 futures = "0.3"
 http = "0.2"
+ammonia = "3.0.0"
+lazy_static = "1.4.0"
