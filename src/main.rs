@@ -188,9 +188,7 @@ async fn serve(argv0: String, argv1: String) {
         .and(inject_context(ctx.clone()))
         .and_then(convert)
         .or(dir)
-        .with(warp::log::custom(|info: warp::filters::log::Info| {
-            print_log(info)
-        }));
+        .with(warp::log::custom(print_log));
     let service = warp::serve(get);
     let addr: std::net::SocketAddr = argv1.parse().expect("not a valid address");
     println!("running on http://{}", addr);
